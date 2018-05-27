@@ -9,6 +9,15 @@ namespace YouTrackManager.Models
 {
     public class Month: Screen
     {
+        public Month()
+        {
+        }
+
+        public Month(int month)
+        {
+            _month = month;
+        }
+
         private string _name;
         public string Name
         {

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,8 +31,10 @@ namespace YouTrackManager.Models
 
         public int DayOfMonth => Date.Day;
 
-        private double _time;
-        public double Time
+        public string Name { get { return CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(_date.DayOfWeek); } }
+
+        private TimeSpan _time;
+        public TimeSpan Time
         {
             get
             {
@@ -43,9 +46,12 @@ namespace YouTrackManager.Models
                 {
                     _time = value;
                     NotifyOfPropertyChange(() => Time);
+                    NotifyOfPropertyChange(() => TotalHours);
                 }
             }
         }
+
+        public Double TotalHours { get { return Math.Round(Time.TotalHours, 1); } }
 
         private bool _isCurrent;
         public bool IsCurrent

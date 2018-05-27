@@ -1,7 +1,9 @@
 ﻿using Caliburn.Micro;
+using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -36,7 +38,7 @@ namespace YouTrackManager.ViewModels
             }
         }
 
-        private Month _selectedMonth;
+        private Month _selectedMonth = new Month(DateTime.Now.Month);
         public Month SelectedMonth
         {
             get
@@ -49,9 +51,8 @@ namespace YouTrackManager.ViewModels
                 {
                     _selectedMonth = value;
                     NotifyOfPropertyChange(() => SelectedMonth);
-                    BuildCalendar(new DateTime(2018, _selectedMonth.MonthNumber, 1));
-                    
-                    UploadTimeTracking(new DateTime(2018, _selectedMonth.MonthNumber, 1));
+                    BuildCalendar(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
+                    UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
                 }
             }
         }
@@ -69,7 +70,16 @@ namespace YouTrackManager.ViewModels
                 {
                     _selectedDay = value;
                     NotifyOfPropertyChange(() => SelectedDay);
+                    NotifyOfPropertyChange(() => SelectedDayTime);
                 }
+            }
+        }
+
+        public string SelectedDayTime
+        {
+            get
+            {
+                return "Общее время: " + SelectedDay?.Time.Humanize(3).Replace(",","");
             }
         }
 
@@ -100,11 +110,17 @@ namespace YouTrackManager.ViewModels
         public void BackYaerHandler()
         {
             Year.Number--;
+            BuildCalendar(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
+            UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
+
         }
 
         public void ForwardYaerHandler()
         {
             Year.Number++;
+            BuildCalendar(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
+            UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
+
         }
 
         private async Task UploadTimeTracking(DateTime dateTime)
@@ -113,18 +129,26 @@ namespace YouTrackManager.ViewModels
 
             var connection = new UsernamePasswordConnection("http://ticket.infolan.org/", "m.magomedov", "5328469177531");
             var manager = new YoutrackManager(connection);
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             var allWorkItems = await manager.GetCustomWorkItems(dateWithOffset, dateWithOffset.AddDays(42)).ConfigureAwait(false);
+            sw.Stop();
+            var t = sw.Elapsed;
             foreach (var day in Days)
             {
                 var dayWorkItems = allWorkItems.Where(x => x.Date.Date == day.Date);
                 day.Time = SummWorkItemsTimes(dayWorkItems);
 
-                var issues = dayWorkItems.GroupBy(x => x.IssueId)
-                                         .Select(x => new CustomIssue { Id = x.Key, Duration = SummWorkItemsTimes(x.ToList()) });
+                var issues = dayWorkItems.GroupBy(x => x.Issue)
+                                         .Select(x => new CustomIssue { Id = x.Key.Id, Summary = x.Key.Summary, Duration = SummWorkItemsTimes(x.ToList()) });
 
                 day.Issues.AddRange(issues);
             }
+        }
+
+        public void IssueMouseLeftButtonDown(CustomIssue issue)
+        {
+            Process.Start(issue.Url);
         }
 
         private async Task BuildCalendar(DateTime dateTime)
@@ -160,13 +184,13 @@ namespace YouTrackManager.ViewModels
                 return dateTime.AddDays(-6);
         }
 
-        private double SummWorkItemsTimes(IEnumerable<CustomWorkItem> workItems)
+        private TimeSpan SummWorkItemsTimes(IEnumerable<CustomWorkItem> workItems)
         {
             TimeSpan duration = new TimeSpan();
             if (workItems != null)
                 duration = new TimeSpan(workItems.Sum(r => r.Duration.Ticks));
 
-            return Math.Round(duration.TotalHours, 1);
+            return duration;
         }
     }
 }

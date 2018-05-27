@@ -43,31 +43,31 @@ namespace YouTrackManager.Utils
             var issues = new List<Issue>();
             try
             {
-                issues.AddRange(await issueService.GetIssuesInProject(project.ShortName, $"обновлена: {from.ToString("yyyy-MM")} .. {to.ToString("yyyy-MM")}", take: 5000).ConfigureAwait(false));
+                issues.AddRange(await issueService.GetIssuesInProject(project.ShortName, take: 5000).ConfigureAwait(false)); // $"обновлена: {from.ToString("yyyy-MM-dd")} .. {to.ToString("yyyy-MM-dd")}"
             }
             catch (Exception ex)
             {
                 // MessageBox.Show(ex.Message);
             }
 
-            var workItemsTasks = issues.Select(i => GetCustomWorkItemsForIssue(timeTrackingService, i.Id, from, to)).ToArray();
+            var workItemsTasks = issues.Select(i => GetCustomWorkItemsForIssue(timeTrackingService, i, from, to)).ToArray();
             var customItems = await Task.WhenAll(workItemsTasks).ConfigureAwait(false);
             return customItems.SelectMany(x => x).ToList();
         }
 
-        private async Task<List<CustomWorkItem>> GetCustomWorkItemsForIssue(TimeTrackingService timeTrackingService, string issueId, DateTime from, DateTime to)
+        private async Task<List<CustomWorkItem>> GetCustomWorkItemsForIssue(TimeTrackingService timeTrackingService, Issue issue, DateTime from, DateTime to)
         {
             var result = new List<CustomWorkItem>();
             try
             {
-                var workItems = await timeTrackingService.GetWorkItemsForIssue(issueId).ConfigureAwait(false);
+                var workItems = await timeTrackingService.GetWorkItemsForIssue(issue.Id).ConfigureAwait(false);
                 return workItems
                     .Where(wi => wi.Author.Login == "m.magomedov"
                                 && wi.Date >= from
                                 && wi.Date <= to)
                     .Select(wi => new CustomWorkItem()
                     {
-                        IssueId = issueId,
+                        Issue = issue,
                         Date = wi.Date.Value,
                         Duration = wi.Duration
                     }).ToList();

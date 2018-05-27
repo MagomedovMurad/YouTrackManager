@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Humanizer;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,13 +16,19 @@ namespace YouTrackManager.Models
 
         public string Summary { get; set; }
 
+        public string Name { get { return $"{Id} {Summary}"; } }
+
         public string Url { get { return uri + Id; } }
 
-        public double Duration { get; set; }
+        public TimeSpan Duration { get; set; }
 
-        public void Test()
+        public string Time
         {
-
+            get
+            {
+                return Duration.Humanize(3).Replace(",","") + " на:";
+            }
         }
+
     }
 }
