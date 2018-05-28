@@ -171,7 +171,7 @@ namespace YouTrackManager.ViewModels
 
         private int GetOffset(DayOfWeek dow)
         {
-            return Convert.ToInt32(dow.ToString("D")) - 1;
+            return Convert.ToInt32(dow.ToString("D"));
         }
 
         private DateTime GetDateWithOffset(DateTime dateTime)
@@ -179,7 +179,7 @@ namespace YouTrackManager.ViewModels
             int offset = GetOffset(dateTime.DayOfWeek);
 
             if (offset != 0)
-                return dateTime.AddDays(-offset);
+                return dateTime.AddDays(-offset + 1);
             else
                 return dateTime.AddDays(-6);
         }
