@@ -142,6 +142,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\ScrollingVisibilityConverter.cs" />
     <Compile Include="Models\CustomIssue.cs" />
     <Compile Include="Models\CustomWorkItem.cs" />
     <Compile Include="Models\Year.cs" />
