@@ -21,6 +21,8 @@ namespace YouTrackManager.ViewModels
         public BindableCollection<Month> Months { get; set; } = new BindableCollection<Month>();
         public BindableCollection<Day> Days { get; set; } = new BindableCollection<Day>();
 
+        private List<CustomWorkItem> _allWorkItems = new List<CustomWorkItem>();
+
         private Year _year;
         public Year Year
         {
@@ -52,7 +54,7 @@ namespace YouTrackManager.ViewModels
                     _selectedMonth = value;
                     NotifyOfPropertyChange(() => SelectedMonth);
                     BuildCalendar(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
-                    UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
+                    //UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
                 }
             }
         }
@@ -87,6 +89,7 @@ namespace YouTrackManager.ViewModels
         {
             Year = new Year(DateTime.Now.Year, true);
             Months.AddRange(GetMonths());
+            UploadWorkItems();
         }
 
         private List<Month> GetMonths()
@@ -111,39 +114,35 @@ namespace YouTrackManager.ViewModels
         {
             Year.Number--;
             BuildCalendar(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
-            UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
-
         }
 
         public void ForwardYaerHandler()
         {
             Year.Number++;
             BuildCalendar(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
-            UploadTimeTracking(new DateTime(Year.Number, _selectedMonth.MonthNumber, 1));
-
         }
 
-        private async Task UploadTimeTracking(DateTime dateTime)
+        private async Task UploadWorkItems()
         {
-            DateTime dateWithOffset = GetDateWithOffset(dateTime);
-
             var connection = new UsernamePasswordConnection("http://ticket.infolan.org/", "m.magomedov", "5328469177531");
             var manager = new YoutrackManager(connection);
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            var allWorkItems = await manager.GetCustomWorkItems(dateWithOffset, dateWithOffset.AddDays(42)).ConfigureAwait(false);
-            sw.Stop();
-            var t = sw.Elapsed;
-            foreach (var day in Days)
+            _allWorkItems = await manager.GetAllWorkItems().ConfigureAwait(false);
+
+            UploadTimeTracking();
+        }
+
+        private void UploadTimeTracking()
+        {
+            Days.ToList().ForEach(day =>
             {
-                var dayWorkItems = allWorkItems.Where(x => x.Date.Date == day.Date);
+                var dayWorkItems = _allWorkItems.Where(x => x.Date.Date == day.Date);
                 day.Time = SummWorkItemsTimes(dayWorkItems);
 
                 var issues = dayWorkItems.GroupBy(x => x.Issue)
                                          .Select(x => new CustomIssue { Id = x.Key.Id, Summary = x.Key.Summary, Duration = SummWorkItemsTimes(x.ToList()) });
 
                 day.Issues.AddRange(issues);
-            }
+            });
         }
 
         public void IssueMouseLeftButtonDown(CustomIssue issue)
@@ -151,11 +150,8 @@ namespace YouTrackManager.ViewModels
             Process.Start(issue.Url);
         }
 
-        private async Task BuildCalendar(DateTime dateTime)
+        private void BuildCalendar(DateTime dateTime)
         {
-            var connection = new UsernamePasswordConnection("http://ticket.infolan.org/", "m.magomedov", "5328469177531");
-            var manager = new YoutrackManager(connection);
-
             Days.Clear();
             DateTime date = GetDateWithOffset(dateTime);
             for (int i = 1; i <= 42; i++)
@@ -167,6 +163,8 @@ namespace YouTrackManager.ViewModels
                 Days.Add(day);
                 date = date.AddDays(1);
             }
+
+            UploadTimeTracking();
         }
 
         private int GetOffset(DayOfWeek dow)
