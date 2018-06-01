@@ -308,8 +308,8 @@
         
 
     </UserControl.Resources>
-    <Grid Background="LightGray">
-        <Border CornerRadius="10" Height="380" Width="800" >
+    <!--<Grid Background="LightGray">-->
+        <!--<Border CornerRadius="10" BorderBrush="AliceBlue" BorderThickness="1" Height="380" Width="800" >-->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300"/>
@@ -434,6 +434,6 @@
                 </Border>
                 
             </Grid>
-        </Border>
-    </Grid>
+        <!--</Border>-->
+    <!--</Grid>-->
 </UserControl>

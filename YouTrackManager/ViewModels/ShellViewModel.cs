@@ -29,9 +29,28 @@ namespace YouTrackManager.ViewModels
             }
         }
 
+        private LogonViewModel _logon;
+        public LogonViewModel Logon
+        {
+            get
+            {
+                return _logon;
+            }
+
+            set
+            {
+                if (_logon != value)
+                {
+                    _logon = value;
+                    NotifyOfPropertyChange(() => Logon);
+                }
+            }
+        }
+
         public ShellViewModel()
         {
             Calendar = new TimeAccountingCalendarViewModel();
+            Logon = new LogonViewModel();
         }
     }
 }
