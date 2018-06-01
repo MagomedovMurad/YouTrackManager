@@ -6,6 +6,9 @@
              xmlns:local="clr-namespace:YouTrackManager.Views"
              xmlns:cal="http://www.caliburnproject.org">
     <Grid>
-        <ContentControl cal:View.Model="{Binding Calendar}"/>
+        <Border CornerRadius="10" BorderBrush="LightSeaGreen" BorderThickness="0.6" Height="380" Width="800" >
+                <!--<ContentControl cal:View.Model="{Binding Calendar}"/>-->
+                <ContentControl cal:View.Model="{Binding Logon}"/>
+        </Border>
     </Grid>
 </UserControl>

@@ -142,16 +142,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\ScrollingVisibilityConverter.cs" />
     <Compile Include="Models\CustomIssue.cs" />
     <Compile Include="Models\CustomWorkItem.cs" />
     <Compile Include="Models\Year.cs" />
     <Compile Include="Utils\YoutrackManager.cs" />
     <Compile Include="Models\Day.cs" />
     <Compile Include="Models\Month.cs" />
+    <Compile Include="ViewModels\LogonViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TimeAccountingCalendarViewModel.cs" />
     <Compile Include="Views\DayView.xaml.cs">
       <DependentUpon>DayView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LogonView.xaml.cs">
+      <DependentUpon>LogonView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
@@ -173,6 +178,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\DayView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LogonView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
