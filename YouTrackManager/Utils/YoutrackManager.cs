@@ -16,11 +16,36 @@ namespace YouTrackManager.Utils
 {
     public class YoutrackManager
     {
+        private const string _hostAddress = "http://ticket.infolan.org/";
+
         public UsernamePasswordConnection _connection;
 
         public YoutrackManager(UsernamePasswordConnection connection)
         {
             _connection = connection;
+        }
+
+        public YoutrackManager(string login, string password)
+        {
+            _connection = new UsernamePasswordConnection(_hostAddress, login, password);
+        }
+
+        public async Task<string> CheckConnection()
+        {
+            try
+            {
+                var userService = new YouTrackSharp.Users.UserService(_connection);
+                var info = await userService.GetCurrentUserInfo().ConfigureAwait(false);
+                return null;
+            }
+            catch (UnauthorizedConnectionException ex)
+            {
+                return "Неверный логин или пароль. Возможно недоступен сервер";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         public async Task<List<CustomWorkItem>> GetAllWorkItems()

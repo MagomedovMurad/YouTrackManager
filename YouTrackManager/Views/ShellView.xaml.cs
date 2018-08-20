@@ -18,11 +18,18 @@ namespace YouTrackManager.Views
     /// <summary>
     /// Логика взаимодействия для ShellView.xaml
     /// </summary>
-    public partial class ShellView : UserControl
+    public partial class ShellView : Window
     {
         public ShellView()
         {
             InitializeComponent();
+        }
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonDown(e);
+
+            // Begin dragging the window
+            this.DragMove();
         }
     }
 }

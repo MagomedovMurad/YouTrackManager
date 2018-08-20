@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YouTrackManager.Models;
+using YouTrackManager.Utils;
 
 namespace YouTrackManager.ViewModels
 {
@@ -47,10 +48,37 @@ namespace YouTrackManager.ViewModels
             }
         }
 
+        private Screen _window;
+        public Screen Window
+        {
+
+            get
+            {
+                return _window;
+            }
+            set
+            {
+                if (_window != value)
+                {
+                    _window = value;
+                    NotifyOfPropertyChange(() => Window);
+                }
+            }
+        }
+
         public ShellViewModel()
         {
-            Calendar = new TimeAccountingCalendarViewModel();
-            Logon = new LogonViewModel();
+            //Calendar = new TimeAccountingCalendarViewModel(null);
+            //Window = Calendar;
+
+            var logon = new LogonViewModel();
+            logon.LogonSuccess += LogonSuccess;
+            Window = logon;
+        }
+
+        private void LogonSuccess(object sender, LogonEventArgs e)
+        {
+            Window = new TimeAccountingCalendarViewModel(e.Connection);
         }
     }
 }

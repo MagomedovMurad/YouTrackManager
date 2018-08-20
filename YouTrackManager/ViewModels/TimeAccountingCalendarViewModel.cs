@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using YouTrackManager.Models;
 using YouTrackManager.Utils;
 using YouTrackSharp;
@@ -22,6 +23,7 @@ namespace YouTrackManager.ViewModels
         public BindableCollection<Day> Days { get; set; } = new BindableCollection<Day>();
 
         private List<CustomWorkItem> _allWorkItems = new List<CustomWorkItem>();
+        private UsernamePasswordConnection _connection;
 
         private Year _year;
         public Year Year
@@ -77,6 +79,23 @@ namespace YouTrackManager.ViewModels
             }
         }
 
+        private bool _isBusy;
+        public bool IsBusy
+        {
+            get
+            {
+                return _isBusy;
+            }
+            set
+            {
+                if (_isBusy != value)
+                {
+                    _isBusy = value;
+                    NotifyOfPropertyChange(() => IsBusy);
+                }
+            }
+        }
+
         public string SelectedDayTime
         {
             get
@@ -85,11 +104,18 @@ namespace YouTrackManager.ViewModels
             }
         }
 
-        public TimeAccountingCalendarViewModel()
+        public TimeAccountingCalendarViewModel(UsernamePasswordConnection connection)
         {
+            _connection = connection;
+
             Year = new Year(DateTime.Now.Year, true);
             Months.AddRange(GetMonths());
             UploadWorkItems();
+        }
+
+        protected override void OnViewLoaded(object view)
+        {
+            NotifyOfPropertyChange(() => IsBusy);
         }
 
         private List<Month> GetMonths()
@@ -124,11 +150,13 @@ namespace YouTrackManager.ViewModels
 
         private async Task UploadWorkItems()
         {
-            var connection = new UsernamePasswordConnection("http://ticket.infolan.org/", "m.magomedov", "5328469177531");
-            var manager = new YoutrackManager(connection);
+            IsBusy = true;
+
+            var manager = new YoutrackManager(_connection);
             _allWorkItems = await manager.GetAllWorkItems().ConfigureAwait(false);
 
             UploadTimeTracking();
+            IsBusy = false;
         }
 
         private void UploadTimeTracking()
@@ -189,6 +217,11 @@ namespace YouTrackManager.ViewModels
                 duration = new TimeSpan(workItems.Sum(r => r.Duration.Ticks));
 
             return duration;
+        }
+
+        public void CloseApp()
+        {
+            Application.Current.Shutdown();
         }
     }
 }

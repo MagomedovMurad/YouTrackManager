@@ -20,6 +20,11 @@ namespace YouTrackManager.Views
     /// </summary>
     public partial class LogonView : UserControl
     {
+        public PasswordBox PasswordBox
+        {
+            get { return LoginPasswordBox; }
+        }
+
         public LogonView()
         {
             InitializeComponent();
